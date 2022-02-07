@@ -1,9 +1,9 @@
-import "./App.css";
+import { ConverterCurrency } from "./container/ConverterCurrency";
 
 function App() {
   return (
     <div className="App">
-      <p>Hello</p>
+      <ConverterCurrency />
     </div>
   );
 }
