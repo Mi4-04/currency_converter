@@ -12,7 +12,7 @@
 /build
 
 # misc
-src/.prettierrs
+/src.prettierrc
 .env
 .DS_Store
 .env.local
