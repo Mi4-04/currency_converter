@@ -4,30 +4,78 @@ import axios from "axios";
 import { ConverterInput } from "../../components/ConverterInput";
 import { ConverterSelect } from "../../components/ConverterSelect";
 import { BASE_URL } from "../../constant";
+import { SwapCurrencies } from "../../components/SwapCurrencies";
 
 export const ConverterCurrency = () => {
-  const [rates, setRates] = React.useState();
+  const [rates, setRates] = React.useState([]);
   const [fromCurrency, setFromCurrency] = React.useState("USD");
   const [toCurrency, setToCurrency] = React.useState("RUB");
-  const [amount, setAmount] = React.useState(1);
+  const [fromAmount, setFromAmount] = React.useState(1);
+  const [toAmount, setToAmount] = React.useState(1);
 
   React.useEffect(() => {
     axios({
       method: "GET",
+      url: `${BASE_URL}${process.env.REACT_APP_KEY}`,
+    }).then((res) => {
+      setRates(res.data.rates);
+    });
+  }, []);
 
-      url: `${BASE_URL}${process.env.REACT_APP_KEY}/latest/${fromCurrency}`,
-    }).then((res) => setRates(res.data.conversion_rates));
-  }, [fromCurrency]);
+  React.useEffect(() => {
+    if (!!rates) {
+      function init() {
+        handleFromAmountChange(1);
+      }
+      init();
+    }
+  }, [rates]);
 
-  const handleChangeAmount = (e) => {
-    setAmount(e.target.value < 0 ? 0 : e.target.value);
+  function format(number) {
+    return number.toFixed(2);
+  }
+
+  const handleFromAmountChange = (fromAmount) => {
+    if (fromCurrency !== null && toCurrency !== null) {
+      setToAmount(
+        format((fromAmount * rates[toCurrency]) / rates[fromCurrency])
+      );
+      setFromAmount(fromAmount);
+    }
   };
 
-  const result = (amount * (rates && rates[toCurrency])).toFixed(2);
+  const handleFromCurrencyChange = (fromCurrency) => {
+    if (fromCurrency !== null && toCurrency !== null) {
+      setToAmount(
+        format((fromAmount * rates[toCurrency]) / rates[fromCurrency])
+      );
+      setFromCurrency(fromCurrency);
+    }
+  };
+
+  const handleToAmountChange = (toAmount) => {
+    if (fromCurrency !== null && toCurrency !== null) {
+      setFromAmount(
+        format((toAmount * rates[fromCurrency]) / rates[toCurrency])
+      );
+      setToAmount(toAmount);
+    }
+  };
+
+  const handleToCurrencyChange = (toCurrency) => {
+    if (fromCurrency !== null && toCurrency !== null) {
+      setFromAmount(
+        format((toAmount * rates[fromCurrency]) / rates[toCurrency])
+      );
+      setToCurrency(toCurrency);
+    }
+  };
 
   const handleChangeCurrency = () => {
-    setAmount(result);
+    const value = toAmount;
     const currency = toCurrency;
+    setToAmount(fromAmount);
+    setFromAmount(value);
     setToCurrency(fromCurrency);
     setFromCurrency(currency);
   };
@@ -40,25 +88,29 @@ export const ConverterCurrency = () => {
         <div className="main_container_select">
           <ConverterSelect
             value={fromCurrency}
-            onChange={(e) => setFromCurrency(e.target.value)}
-            rates={rates}
+            onCurrencyChange={handleFromCurrencyChange}
+            currencies={Object.keys(rates)}
           />
           <p className="text_interval">в</p>
           <ConverterSelect
             value={toCurrency}
-            onChange={(e) => setToCurrency(e.target.value)}
-            rates={rates}
+            onCurrencyChange={handleToCurrencyChange}
+            currencies={Object.keys(rates)}
           />
         </div>
         <div className="main_container_input">
-          <ConverterInput amount={amount} onChange={handleChangeAmount} />
+          <ConverterInput
+            amount={fromAmount}
+            onAmountChange={handleFromAmountChange}
+          />
           <p className="text_interval">=</p>
-          <ConverterInput amount={result} />
+          <ConverterInput
+            amount={toAmount}
+            onAmountChange={handleToAmountChange}
+          />
         </div>
       </div>
-      <a className="change_currency" onClick={handleChangeCurrency}>
-        Поменять валюты местами
-      </a>
+      <SwapCurrencies handleChangeCurrency={handleChangeCurrency} />
     </div>
   );
 };

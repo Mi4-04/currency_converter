@@ -1,1 +1,1 @@
-export const BASE_URL = "https://v6.exchangerate-api.com/v6/";
+export const BASE_URL = "http://data.fixer.io/api/latest?access_key=";
