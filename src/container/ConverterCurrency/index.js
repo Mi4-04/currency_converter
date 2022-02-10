@@ -8,7 +8,7 @@ import { SwapCurrencies } from "../../components/SwapCurrencies";
 
 export const ConverterCurrency = () => {
   const [rates, setRates] = React.useState([]);
-  const [fromCurrency, setFromCurrency] = React.useState("USD");
+  const [fromCurrency, setFromCurrency] = React.useState("RUB");
   const [toCurrency, setToCurrency] = React.useState("RUB");
   const [fromAmount, setFromAmount] = React.useState(1);
   const [toAmount, setToAmount] = React.useState(1);
@@ -23,12 +23,6 @@ export const ConverterCurrency = () => {
     });
   }, []);
 
-  React.useEffect(() => {
-    if (rates) {
-      handleInputChange(1, isFrom);
-    }
-  }, [rates]);
-
   const handleInputChange = (amount, isFrom) => {
     const round = (number) => Math.round(Number(number) * 100) / 100;
 
@@ -36,14 +30,13 @@ export const ConverterCurrency = () => {
       if (isFrom) {
         setFromAmount(round(amount));
         setToAmount(round(amount * (rates[fromCurrency] / rates[toCurrency])));
-        setIsFrom(true);
       } else {
         setFromAmount(
           round(amount / (rates[fromCurrency] / rates[toCurrency]))
         );
         setToAmount(round(amount));
-        setIsFrom(false);
       }
+      setIsFrom(isFrom);
     }
   };
 
