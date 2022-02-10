@@ -10,8 +10,34 @@ export const ConverterCurrency = () => {
   const [rates, setRates] = React.useState([]);
   const [fromCurrency, setFromCurrency] = React.useState("USD");
   const [toCurrency, setToCurrency] = React.useState("RUB");
-  const [fromAmount, setFromAmount] = React.useState(1);
-  const [toAmount, setToAmount] = React.useState(1);
+  const [amount, setAmount] = React.useState(1);
+  const [isFrom, setIsFrom] = React.useState(true);
+
+  const handleFrom = React.useCallback((amount) => {
+    setAmount(Number(amount));
+    setIsFrom(true);
+  }, []);
+
+  const handleTo = React.useCallback((amount) => {
+    setAmount(Number(amount));
+    setIsFrom(false);
+  }, []);
+
+  const round = (number) => Math.round(number * 100) / 100;
+
+  const rate =
+    rates[fromCurrency] && rates[toCurrency]
+      ? rates[fromCurrency] / rates[toCurrency]
+      : 1;
+
+  let fromAmount, toAmount;
+  if (isFrom) {
+    fromAmount = round(amount);
+    toAmount = round(amount * rate);
+  } else {
+    fromAmount = round(amount / rate);
+    toAmount = round(amount);
+  }
 
   React.useEffect(() => {
     axios({
@@ -22,63 +48,13 @@ export const ConverterCurrency = () => {
     });
   }, []);
 
-  React.useEffect(() => {
-    if (!!rates) {
-      function init() {
-        handleFromAmountChange(1);
-      }
-      init();
-    }
-  }, [rates]);
-
-  function format(number) {
-    return number.toFixed(2);
-  }
-
-  const handleFromAmountChange = (fromAmount) => {
-    if (fromCurrency !== null && toCurrency !== null) {
-      setToAmount(
-        format((fromAmount * rates[toCurrency]) / rates[fromCurrency])
-      );
-      setFromAmount(fromAmount);
-    }
-  };
-
-  const handleFromCurrencyChange = (fromCurrency) => {
-    if (fromCurrency !== null && toCurrency !== null) {
-      setToAmount(
-        format((fromAmount * rates[toCurrency]) / rates[fromCurrency])
-      );
-      setFromCurrency(fromCurrency);
-    }
-  };
-
-  const handleToAmountChange = (toAmount) => {
-    if (fromCurrency !== null && toCurrency !== null) {
-      setFromAmount(
-        format((toAmount * rates[fromCurrency]) / rates[toCurrency])
-      );
-      setToAmount(toAmount);
-    }
-  };
-
-  const handleToCurrencyChange = (toCurrency) => {
-    if (fromCurrency !== null && toCurrency !== null) {
-      setFromAmount(
-        format((toAmount * rates[fromCurrency]) / rates[toCurrency])
-      );
-      setToCurrency(toCurrency);
-    }
-  };
-
   const handleChangeCurrency = () => {
-    const value = toAmount;
     const currency = toCurrency;
-    setToAmount(fromAmount);
-    setFromAmount(value);
     setToCurrency(fromCurrency);
     setFromCurrency(currency);
   };
+
+  const currencies = Object.keys(rates);
 
   return (
     <div>
@@ -87,27 +63,21 @@ export const ConverterCurrency = () => {
         <span>Вы переходите из</span>
         <div className="main_container_select">
           <ConverterSelect
-            value={fromCurrency}
-            onCurrencyChange={handleFromCurrencyChange}
-            currencies={Object.keys(rates)}
+            value={toCurrency}
+            onCurrencyChange={setToCurrency}
+            currencies={currencies}
           />
           <p className="text_interval">в</p>
           <ConverterSelect
-            value={toCurrency}
-            onCurrencyChange={handleToCurrencyChange}
-            currencies={Object.keys(rates)}
+            value={fromCurrency}
+            onCurrencyChange={setFromCurrency}
+            currencies={currencies}
           />
         </div>
         <div className="main_container_input">
-          <ConverterInput
-            amount={fromAmount}
-            onAmountChange={handleFromAmountChange}
-          />
+          <ConverterInput amount={fromAmount} onAmountChange={handleFrom} />
           <p className="text_interval">=</p>
-          <ConverterInput
-            amount={toAmount}
-            onAmountChange={handleToAmountChange}
-          />
+          <ConverterInput amount={toAmount} onAmountChange={handleTo} />
         </div>
       </div>
       <SwapCurrencies handleChangeCurrency={handleChangeCurrency} />

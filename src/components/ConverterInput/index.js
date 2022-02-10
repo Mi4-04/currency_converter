@@ -10,7 +10,9 @@ export const ConverterInput = (props) => {
         type="number"
         value={amount}
         min={1}
-        onChange={(e) => onAmountChange(e.target.value)}
+        onChange={(e) =>
+          onAmountChange(e.target.value < 0 ? 1 : e.target.value)
+        }
       />
     </div>
   );
