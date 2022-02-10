@@ -2,16 +2,15 @@ import React from "react";
 import "./style.css";
 
 export const ConverterInput = (props) => {
-  const { amount, onAmountChange } = props;
+  const { amount, onAmountChange, isFrom } = props;
 
   return (
     <div>
       <input
         type="number"
         value={amount}
-        min={1}
         onChange={(e) =>
-          onAmountChange(e.target.value < 0 ? 1 : e.target.value)
+          onAmountChange(e.target.value < 0 ? 1 : e.target.value, isFrom)
         }
       />
     </div>

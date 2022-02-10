@@ -10,34 +10,9 @@ export const ConverterCurrency = () => {
   const [rates, setRates] = React.useState([]);
   const [fromCurrency, setFromCurrency] = React.useState("USD");
   const [toCurrency, setToCurrency] = React.useState("RUB");
-  const [amount, setAmount] = React.useState(1);
+  const [fromAmount, setFromAmount] = React.useState(1);
+  const [toAmount, setToAmount] = React.useState(1);
   const [isFrom, setIsFrom] = React.useState(true);
-
-  const handleFrom = React.useCallback((amount) => {
-    setAmount(Number(amount));
-    setIsFrom(true);
-  }, []);
-
-  const handleTo = React.useCallback((amount) => {
-    setAmount(Number(amount));
-    setIsFrom(false);
-  }, []);
-
-  const round = (number) => Math.round(number * 100) / 100;
-
-  const rate =
-    rates[fromCurrency] && rates[toCurrency]
-      ? rates[fromCurrency] / rates[toCurrency]
-      : 1;
-
-  let fromAmount, toAmount;
-  if (isFrom) {
-    fromAmount = round(amount);
-    toAmount = round(amount * rate);
-  } else {
-    fromAmount = round(amount / rate);
-    toAmount = round(amount);
-  }
 
   React.useEffect(() => {
     axios({
@@ -48,8 +23,35 @@ export const ConverterCurrency = () => {
     });
   }, []);
 
+  React.useEffect(() => {
+    if (rates) {
+      handleInputChange(1, isFrom);
+    }
+  }, [rates]);
+
+  const handleInputChange = (amount, isFrom) => {
+    const round = (number) => Math.round(Number(number) * 100) / 100;
+
+    if (rates[fromCurrency] && rates[toCurrency]) {
+      if (isFrom) {
+        setFromAmount(round(amount));
+        setToAmount(round(amount * (rates[fromCurrency] / rates[toCurrency])));
+        setIsFrom(true);
+      } else {
+        setFromAmount(
+          round(amount / (rates[fromCurrency] / rates[toCurrency]))
+        );
+        setToAmount(round(amount));
+        setIsFrom(false);
+      }
+    }
+  };
+
   const handleChangeCurrency = () => {
+    const value = toAmount;
     const currency = toCurrency;
+    setToAmount(fromAmount);
+    setFromAmount(value);
     setToCurrency(fromCurrency);
     setFromCurrency(currency);
   };
@@ -75,9 +77,17 @@ export const ConverterCurrency = () => {
           />
         </div>
         <div className="main_container_input">
-          <ConverterInput amount={fromAmount} onAmountChange={handleFrom} />
+          <ConverterInput
+            isFrom={true}
+            amount={fromAmount}
+            onAmountChange={handleInputChange}
+          />
           <p className="text_interval">=</p>
-          <ConverterInput amount={toAmount} onAmountChange={handleTo} />
+          <ConverterInput
+            isFrom={false}
+            amount={toAmount}
+            onAmountChange={handleInputChange}
+          />
         </div>
       </div>
       <SwapCurrencies handleChangeCurrency={handleChangeCurrency} />
