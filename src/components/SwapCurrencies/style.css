@@ -1,0 +1,9 @@
+.change_currency {
+  display: block;
+  text-align: center;
+  align-items: center;
+  color: grey;
+  text-decoration: underline;
+  margin-top: 30px;
+  margin-left: 15px;
+}
